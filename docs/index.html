@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Pages Should an Editor Review First? — FlyRank ML Internship capstone</title>
+<meta name="description" content="A client-grouped evaluation of a decision-support ranking for content refresh review, built on the FlyRank ML Internship dataset.">
+<style>
+:root{color-scheme:light;--bg:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#7a7975;--line:#e4e3df;--card:#f4f3f0;
+--series-1:#2a78d6;--rule:#8f8d87;--base:#c9c7c1;--warn:#e34948;--accent:#2a78d6}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#9a998f;--line:#34332f;--card:#232321;
+--series-1:#3987e5;--rule:#8a8880;--base:#55544f;--warn:#e66767;--accent:#5c9eea}}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 Georgia,"Iowan Old Style","Times New Roman",serif}
+main{max-width:780px;margin:0 auto;padding:48px 22px 80px}
+.kicker{font:600 12px/1.4 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:700 34px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;margin:10px 0 12px;letter-spacing:-.01em}
+h2{font:700 22px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;margin:46px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+h3{font:600 17px/1.4 system-ui,sans-serif;margin:26px 0 6px}
+.byline{font:14px/1.5 system-ui,sans-serif;color:var(--ink2)} .byline a{color:var(--ink2)}
+a{color:var(--accent)} code{font:14px ui-monospace,Menlo,Consolas,monospace;background:var(--card);padding:1px 5px;border-radius:4px}
+.abstract{background:var(--card);border-radius:10px;padding:18px 22px;margin:26px 0} .abstract b{font-family:system-ui,sans-serif;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0}
+.stat{border:1px solid var(--line);border-radius:10px;padding:14px} .stat .n{font:700 28px/1.1 system-ui,sans-serif} .stat .l{font:13px/1.4 system-ui,sans-serif;color:var(--ink2);margin-top:4px}
+figure{margin:22px 0 28px} figcaption{font:14px/1.5 system-ui,sans-serif;color:var(--ink2);margin-top:6px} figcaption b{color:var(--ink)}
+.chart{width:100%;height:auto;font-family:system-ui,sans-serif}
+.chart .grid{stroke:var(--line);stroke-width:1} .chart .tick{font-size:11px;fill:var(--muted)} .chart .axis{font-size:12px;fill:var(--ink2)}
+.chart .lab{font-size:13px;fill:var(--ink)} .chart .val{font-size:12px;fill:var(--ink2);font-variant-numeric:tabular-nums}
+.chart .err{stroke:var(--ink2);stroke-width:1.5} .chart .ref{stroke:var(--muted);stroke-dasharray:4 3} .chart .reflabel{font-size:11px;fill:var(--muted)}
+.chart .conn{stroke:var(--muted);stroke-width:2} .chart .ring{stroke:var(--bg);stroke-width:2}
+.chart .mark:hover path,.chart .mark:hover circle{opacity:.8}
+.tw{overflow-x:auto;margin:14px 0 22px} table{border-collapse:collapse;width:100%;font:14px/1.45 system-ui,sans-serif}
+th{text-align:left;font-weight:600;color:var(--ink2);border-bottom:2px solid var(--line);padding:7px 8px;white-space:nowrap}
+td{border-bottom:1px solid var(--line);padding:7px 8px;vertical-align:top} table.num td{font-variant-numeric:tabular-nums}
+ul,ol{padding-left:22px} li{margin:5px 0} .note{font:14px/1.55 system-ui,sans-serif;color:var(--ink2)}
+footer{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);font:14px/1.6 system-ui,sans-serif;color:var(--ink2)}
+</style></head><body><main>
+
+<div class="kicker">FlyRank ML Internship · Capstone · Lane 2: Refresh / Content Opportunity Scoring · November 2026</div>
+<h1>Which Pages Should an Editor Review First? A Client-Grouped Evaluation of a Decision-Support Review Queue</h1>
+<div class="byline">Muhammad Sulaiman · <a href="https://github.com/MuhammadSulaiman08/FLYRANK-ML-INTERNSHIP">Code &amp; notebooks</a> · Built on the <a href="https://flyrank.ai">FlyRank</a> ML Internship dataset</div>
+
+<div class="abstract"><b>Abstract</b><p style="margin:.4em 0 0">An editor can review only a handful of pages a week, so the decision this work supports is the <i>order</i> of that review, measured by Precision@50, fixed before any training. Using 30,000 pseudonymized pages from 32 clients, I compared two transparent rules with four learned models on identical five-fold splits grouped by client, so every score comes from clients the model never saw. The learned models ranked the queue clearly better than both rules (Precision@50 0.77–0.78 versus 0.60 and 0.46; random order 0.54), yet were indistinguishable from each other, so the readable Logistic Regression — the only model ahead of the hand rule in all five folds — drives the final queue. A stricter test on the full warehouse with a genuine future-window label found a much weaker honest signal (ROC AUC 0.60), which is the main limitation. The output is a ranked review queue with reason codes and suggested actions: decision support, not a causal claim about refreshes or a model of Google's ranking.</p></div>
+
+<div class="stats">
+<div class="stat"><div class="n">0.78</div><div class="l">Precision@50, Logistic Regression (unseen clients)</div></div>
+<div class="stat"><div class="n">0.60</div><div class="l">Precision@50, best transparent rule</div></div>
+<div class="stat"><div class="n">5 / 5</div><div class="l">client folds where Logistic Regression beat the rule</div></div>
+<div class="stat"><div class="n">0.60</div><div class="l">honest ROC AUC with a true future label (warehouse)</div></div>
+</div>
+
+<h2>1. Introduction and problem</h2>
+<p>When a page starts losing search traffic, nobody notices until it has already cost visits. A content team cannot check every page, so the practical question is not "will this page decline?" in the abstract but <b>"which fifty pages should a person look at first?"</b> This paper evaluates a ranking for that review queue the way it would be used: on websites the model has never seen, against simple rules a team could write by hand.</p>
+<p><b>Unit:</b> one page. <b>Output:</b> a ranked queue, each page with a score, reason codes a human can check, and one suggested action. <b>Metric:</b> Precision@50 — of the 50 pages placed first, the share that are really declining — plus P@20, P@100, ROC AUC and average precision. <b>Cost of an error:</b> a false alarm wastes an editor's time; a miss lets a valuable page keep losing traffic. Because capacity is the constraint, the top of the list matters most.</p>
+
+<h2>2. Data</h2>
+<p><b>Primary — starter release.</b> 30,000 pseudonymized content pages from 32 clients, one row per page, with trailing-90-day search and analytics signals (impressions, clicks, CTR, average position, sessions, engagement, age, freshness, length, intent, type). The grain was checked: every page identifier is unique. 54.2% of pages are labelled declining.</p>
+<p><b>Validation — warehouse release</b> (FlyRank internship warehouse on Hugging Face, build v20260703). I used the daily performance table for the mid-panel month <b>March 2026</b> only — 9,841,378 page-day rows from 55 clients — and the client table for history depth. The final month (June 2026) was deliberately left untouched as a sealed test window.</p>
+<p><b>Labels.</b> Starter: the page's current trend is "down" — a <i>proxy</i>. Warehouse: a genuine <i>future-window</i> label — the page's daily impressions in March 16–31 fell more than 20% below its March 1–15 average (pages with at least 50 impressions in March 1–15: 92,548 pages, 32.7% declined).</p>
+<p><b>Excluded, and why.</b> The trend columns the label is built from (they would hand the model the answer); page and client identifiers (pseudonyms, used only for grouping and splitting); any value from March 16–31 as a warehouse feature (it is the future at the decision moment); and GA4 session columns on the warehouse (available on only 4.2% of March rows and zero-filled elsewhere). Neither release contains client names, domains, URLs, titles or search queries, and none appear in this paper.</p>
+
+<h2>3. Methodology</h2>
+<p><b>Assumption.</b> A page trending down now is a reasonable stand-in for "worth reviewing"; the warehouse future-window label tests whether that holds forward in time.</p>
+<p><b>Features (starter).</b> 18 numeric signals — search volume, competition, CPC, word and character count, log-transformed 90-day impressions, clicks, sessions and AI sessions, days with impressions and with sessions, content age, days since last update, CTR, average position, engagement rate, scroll rate and AI-traffic share — plus four categorical ones (competition level, content type, intent, position tier), 35 columns after one-hot encoding. A code assertion confirms the label columns are absent.</p>
+<p><b>Baselines (no training).</b> (1) <i>Hand rule</i>: pages not updated for 180+ days that still get 500+ impressions, ranked by impressions. (2) <i>Weighted rule</i> from the reference pipeline: 0.40 × visibility + 0.30 × freshness risk + 0.25 × position opportunity + 0.05 × depth gap. <b>Models:</b> Logistic Regression, a depth-4 Decision Tree, Random Forest and Gradient Boosting, all with fixed seeds.</p>
+<p><b>Validation design.</b> Five-fold <code>GroupKFold</code> on the client identifier: no client appears in both training and test in any fold (checked in code). Every baseline and model is scored on exactly the same folds. Scores used for the final queue are <i>out-of-fold</i>: each page is scored by a model that never saw its client.</p>
+<p><b>Leakage checks.</b> Label columns asserted absent; on the warehouse I added one label-window column on purpose, measured how far it inflated the score, then removed it.</p>
+
+<h2>4. Results</h2>
+<h3>4.1 Learned rankings beat transparent rules on unseen clients</h3>
+<figure><svg viewBox="0 0 680 274" role="img" class="chart">
+<line x1="230.0" y1="8" x2="230.0" y2="236" class="grid"/>
+<text x="230.0" y="252" class="tick" text-anchor="middle">0.00</text>
+<line x1="306.0" y1="8" x2="306.0" y2="236" class="grid"/>
+<text x="306.0" y="252" class="tick" text-anchor="middle">0.20</text>
+<line x1="382.0" y1="8" x2="382.0" y2="236" class="grid"/>
+<text x="382.0" y="252" class="tick" text-anchor="middle">0.40</text>
+<line x1="458.0" y1="8" x2="458.0" y2="236" class="grid"/>
+<text x="458.0" y="252" class="tick" text-anchor="middle">0.60</text>
+<line x1="534.0" y1="8" x2="534.0" y2="236" class="grid"/>
+<text x="534.0" y="252" class="tick" text-anchor="middle">0.80</text>
+<line x1="610.0" y1="8" x2="610.0" y2="236" class="grid"/>
+<text x="610.0" y="252" class="tick" text-anchor="middle">1.00</text>
+<g class="mark"><title>Gradient Boosting: 0.77 ± 0.129</title>
+<text x="220" y="25.4" class="lab" text-anchor="end">Gradient Boosting</text>
+<path d="M230,10 h287.8 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-287.8 z" fill="var(--series-1)"/>
+<line x1="472.8" y1="21.0" x2="570.9" y2="21.0" class="err"/><line x1="472.8" y1="16.0" x2="472.8" y2="26.0" class="err"/><line x1="570.9" y1="16.0" x2="570.9" y2="26.0" class="err"/>
+<text x="576.9" y="25.4" class="val">0.77</text></g>
+<g class="mark"><title>Random Forest: 0.78 ± 0.124</title>
+<text x="220" y="57.4" class="lab" text-anchor="end">Random Forest</text>
+<path d="M230,42 h293.9 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-293.9 z" fill="var(--series-1)"/>
+<line x1="480.8" y1="53.0" x2="575.0" y2="53.0" class="err"/><line x1="480.8" y1="48.0" x2="480.8" y2="58.0" class="err"/><line x1="575.0" y1="48.0" x2="575.0" y2="58.0" class="err"/>
+<text x="581.0" y="57.4" class="val">0.78</text></g>
+<g class="mark"><title>Logistic Regression: 0.78 ± 0.153</title>
+<text x="220" y="89.4" class="lab" text-anchor="end">Logistic Regression</text>
+<path d="M230,74 h290.9 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-290.9 z" fill="var(--series-1)"/>
+<line x1="466.7" y1="85.0" x2="583.0" y2="85.0" class="err"/><line x1="466.7" y1="80.0" x2="466.7" y2="90.0" class="err"/><line x1="583.0" y1="80.0" x2="583.0" y2="90.0" class="err"/>
+<text x="589.0" y="89.4" class="val">0.78</text></g>
+<g class="mark"><title>Decision Tree (depth 4): 0.60 ± 0.110</title>
+<text x="220" y="121.4" class="lab" text-anchor="end">Decision Tree (depth 4)</text>
+<path d="M230,106 h224.0 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-224.0 z" fill="var(--series-1)"/>
+<line x1="416.2" y1="117.0" x2="499.8" y2="117.0" class="err"/><line x1="416.2" y1="112.0" x2="416.2" y2="122.0" class="err"/><line x1="499.8" y1="112.0" x2="499.8" y2="122.0" class="err"/>
+<text x="505.8" y="121.4" class="val">0.60</text></g>
+<g class="mark"><title>Hand rule (stale × visible): 0.60 ± 0.166</title>
+<text x="220" y="153.4" class="lab" text-anchor="end">Hand rule (stale × visible)</text>
+<path d="M230,138 h224.0 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-224.0 z" fill="var(--rule)"/>
+<line x1="394.9" y1="149.0" x2="521.1" y2="149.0" class="err"/><line x1="394.9" y1="144.0" x2="394.9" y2="154.0" class="err"/><line x1="521.1" y1="144.0" x2="521.1" y2="154.0" class="err"/>
+<text x="527.1" y="153.4" class="val">0.60</text></g>
+<g class="mark"><title>Weighted rule (pipeline): 0.46 ± 0.173</title>
+<text x="220" y="185.4" class="lab" text-anchor="end">Weighted rule (pipeline)</text>
+<path d="M230,170 h172.3 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-172.3 z" fill="var(--rule)"/>
+<line x1="340.6" y1="181.0" x2="472.1" y2="181.0" class="err"/><line x1="340.6" y1="176.0" x2="340.6" y2="186.0" class="err"/><line x1="472.1" y1="176.0" x2="472.1" y2="186.0" class="err"/>
+<text x="478.1" y="185.4" class="val">0.46</text></g>
+<g class="mark"><title>Random order (base rate): 0.54</title>
+<text x="220" y="217.4" class="lab" text-anchor="end">Random order (base rate)</text>
+<path d="M230,202 h202.0 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-202.0 z" fill="var(--base)"/>
+<text x="442.0" y="217.4" class="val">0.54</text></g>
+<text x="420.0" y="270" class="axis" text-anchor="middle">Precision@50 — mean over 5 client-grouped folds (whisker = ± 1 std across folds)</text></svg><figcaption><b>Figure 1.</b> Precision@50 by method. Blue = learned models, gray = rules, light gray = random order. The three stronger models sit within each other's fold-to-fold spread.</figcaption></figure>
+<div class="tw"><table class="num"><thead><tr><th>Method</th><th>P@20</th><th>P@50</th><th>P@100</th><th>ROC AUC</th><th>Avg precision</th><th>P@50 std</th></tr></thead><tbody><tr><td>Gradient Boosting</td><td>0.820</td><td>0.768</td><td>0.794</td><td>0.685</td><td>0.692</td><td>0.129</td></tr><tr><td>Random Forest</td><td>0.750</td><td>0.784</td><td>0.776</td><td>0.677</td><td>0.687</td><td>0.124</td></tr><tr><td><b>Logistic Regression</b></td><td>0.780</td><td>0.776</td><td>0.776</td><td>0.667</td><td>0.677</td><td>0.153</td></tr><tr><td>Decision Tree (depth 4)</td><td>0.560</td><td>0.600</td><td>0.630</td><td>0.638</td><td>0.631</td><td>0.110</td></tr><tr><td>Hand rule (stale × visible)</td><td>0.640</td><td>0.600</td><td>0.572</td><td>0.500</td><td>0.545</td><td>0.166</td></tr><tr><td>Weighted rule (pipeline)</td><td>0.420</td><td>0.464</td><td>0.466</td><td>0.599</td><td>0.595</td><td>0.173</td></tr><tr><td>Random order (base rate)</td><td>0.542</td><td>0.542</td><td>0.542</td><td>0.500</td><td>0.542</td><td>0.000</td></tr></tbody></table></div>
+<p>All three stronger models beat both rules by 0.17–0.32 at Precision@50, and beat random order by about 0.23. The differences <i>between</i> them (0.768–0.784) are far smaller than how much each one swings from fold to fold (standard deviation 0.12–0.15), so this evaluation cannot say one is better than another. More complexity did not earn more credit: plain Logistic Regression is as good as the ensembles here. The depth-4 tree only ties the hand rule.</p>
+<figure><svg viewBox="0 0 680 240" role="img" class="chart">
+<line x1="180.0" y1="30" x2="180.0" y2="200" class="grid"/><text x="180.0" y="216" class="tick" text-anchor="middle">0.2</text>
+<line x1="290.0" y1="30" x2="290.0" y2="200" class="grid"/><text x="290.0" y="216" class="tick" text-anchor="middle">0.4</text>
+<line x1="400.0" y1="30" x2="400.0" y2="200" class="grid"/><text x="400.0" y="216" class="tick" text-anchor="middle">0.6</text>
+<line x1="510.0" y1="30" x2="510.0" y2="200" class="grid"/><text x="510.0" y="216" class="tick" text-anchor="middle">0.8</text>
+<line x1="620.0" y1="30" x2="620.0" y2="200" class="grid"/><text x="620.0" y="216" class="tick" text-anchor="middle">1.0</text>
+<g class="mark"><title>Fold 1: hand rule 0.46 → Logistic Regression 0.78</title>
+<text x="58" y="51" class="lab" text-anchor="end">Fold 1</text>
+<line x1="323.0" y1="46" x2="499.0" y2="46" class="conn"/>
+<circle cx="323.0" cy="46" r="6" fill="var(--rule)" class="ring"/><circle cx="499.0" cy="46" r="6" fill="var(--series-1)" class="ring"/>
+<text x="509.0" y="51" class="val">+0.32</text></g>
+<g class="mark"><title>Fold 2: hand rule 0.68 → Logistic Regression 0.80</title>
+<text x="58" y="85" class="lab" text-anchor="end">Fold 2</text>
+<line x1="444.0" y1="80" x2="510.0" y2="80" class="conn"/>
+<circle cx="444.0" cy="80" r="6" fill="var(--rule)" class="ring"/><circle cx="510.0" cy="80" r="6" fill="var(--series-1)" class="ring"/>
+<text x="520.0" y="85" class="val">+0.12</text></g>
+<g class="mark"><title>Fold 3: hand rule 0.40 → Logistic Regression 0.52</title>
+<text x="58" y="119" class="lab" text-anchor="end">Fold 3</text>
+<line x1="290.0" y1="114" x2="356.0" y2="114" class="conn"/>
+<circle cx="290.0" cy="114" r="6" fill="var(--rule)" class="ring"/><circle cx="356.0" cy="114" r="6" fill="var(--series-1)" class="ring"/>
+<text x="366.0" y="119" class="val">+0.12</text></g>
+<g class="mark"><title>Fold 4: hand rule 0.66 → Logistic Regression 0.86</title>
+<text x="58" y="153" class="lab" text-anchor="end">Fold 4</text>
+<line x1="433.0" y1="148" x2="543.0" y2="148" class="conn"/>
+<circle cx="433.0" cy="148" r="6" fill="var(--rule)" class="ring"/><circle cx="543.0" cy="148" r="6" fill="var(--series-1)" class="ring"/>
+<text x="553.0" y="153" class="val">+0.20</text></g>
+<g class="mark"><title>Fold 5: hand rule 0.80 → Logistic Regression 0.92</title>
+<text x="58" y="187" class="lab" text-anchor="end">Fold 5</text>
+<line x1="510.0" y1="182" x2="576.0" y2="182" class="conn"/>
+<circle cx="510.0" cy="182" r="6" fill="var(--rule)" class="ring"/><circle cx="576.0" cy="182" r="6" fill="var(--series-1)" class="ring"/>
+<text x="586.0" y="187" class="val">+0.12</text></g>
+<text x="345.0" y="234" class="axis" text-anchor="middle">Precision@50 on that fold's unseen clients</text>
+<g transform="translate(70,16)"><circle cx="0" cy="-4" r="5" fill="var(--rule)"/><text x="10" y="0" class="lab">Hand rule</text><circle cx="100" cy="-4" r="5" fill="var(--series-1)"/><text x="110" y="0" class="lab">Logistic Regression</text></g></svg><figcaption><b>Figure 2.</b> Precision@50 on each fold's unseen clients. Logistic Regression is ahead of the hand rule in all five folds (gains +0.12 to +0.32); Random Forest was ahead in three and Gradient Boosting in four. This consistency, plus readability, is why Logistic Regression drives the final queue.</figcaption></figure>
+
+<h3>4.2 What the models lean on</h3>
+<figure><svg viewBox="0 0 680 306" role="img" class="chart">
+<line x1="200.0" y1="8" x2="200.0" y2="268" class="grid"/>
+<text x="200.0" y="284" class="tick" text-anchor="middle">0.00</text>
+<line x1="336.7" y1="8" x2="336.7" y2="268" class="grid"/>
+<text x="336.7" y="284" class="tick" text-anchor="middle">0.020</text>
+<line x1="473.3" y1="8" x2="473.3" y2="268" class="grid"/>
+<text x="473.3" y="284" class="tick" text-anchor="middle">0.040</text>
+<line x1="610.0" y1="8" x2="610.0" y2="268" class="grid"/>
+<text x="610.0" y="284" class="tick" text-anchor="middle">0.06</text>
+<g class="mark"><title>Average position: 0.056</title>
+<text x="190" y="25.4" class="lab" text-anchor="end">Average position</text>
+<path d="M200,10 h380.7 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-380.7 z" fill="var(--series-1)"/>
+<text x="590.7" y="25.4" class="val">0.056</text></g>
+<g class="mark"><title>Content age (days): 0.027</title>
+<text x="190" y="57.4" class="lab" text-anchor="end">Content age (days)</text>
+<path d="M200,42 h181.9 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-181.9 z" fill="var(--series-1)"/>
+<text x="391.9" y="57.4" class="val">0.027</text></g>
+<g class="mark"><title>Position tier: page 1: 0.009</title>
+<text x="190" y="89.4" class="lab" text-anchor="end">Position tier: page 1</text>
+<path d="M200,74 h60.9 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-60.9 z" fill="var(--series-1)"/>
+<text x="270.9" y="89.4" class="val">0.009</text></g>
+<g class="mark"><title>Position tier: pages 3–5: 0.006</title>
+<text x="190" y="121.4" class="lab" text-anchor="end">Position tier: pages 3–5</text>
+<path d="M200,106 h38.4 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-38.4 z" fill="var(--series-1)"/>
+<text x="248.4" y="121.4" class="val">0.006</text></g>
+<g class="mark"><title>Days with impressions: 0.003</title>
+<text x="190" y="153.4" class="lab" text-anchor="end">Days with impressions</text>
+<path d="M200,138 h17.2 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-17.2 z" fill="var(--series-1)"/>
+<text x="227.2" y="153.4" class="val">0.003</text></g>
+<g class="mark"><title>Position tier: deep: 0.003</title>
+<text x="190" y="185.4" class="lab" text-anchor="end">Position tier: deep</text>
+<path d="M200,170 h14.5 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-14.5 z" fill="var(--series-1)"/>
+<text x="224.4" y="185.4" class="val">0.003</text></g>
+<g class="mark"><title>Position tier: top 3: 0.003</title>
+<text x="190" y="217.4" class="lab" text-anchor="end">Position tier: top 3</text>
+<path d="M200,202 h13.1 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-13.1 z" fill="var(--series-1)"/>
+<text x="223.1" y="217.4" class="val">0.003</text></g>
+<g class="mark"><title>Word count: 0.001</title>
+<text x="190" y="249.4" class="lab" text-anchor="end">Word count</text>
+<path d="M200,234 h4.9 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-4.9 z" fill="var(--series-1)"/>
+<text x="214.9" y="249.4" class="val">0.001</text></g>
+<text x="405.0" y="302" class="axis" text-anchor="middle">Drop in ROC AUC when the feature is shuffled (held-out clients, Random Forest)</text></svg><figcaption><b>Figure 3.</b> Permutation importance on one held-out fold. Average position dominates, then content age. Nothing is "suspiciously perfect", which is consistent with no leakage.</figcaption></figure>
+<p>Read together with Logistic Regression's coefficients — the largest are impressions (positive) and clicks (negative) — the pattern is: <b>pages that are visible but rarely clicked, and younger pages, were more often declining</b> in this sample. That matches the early discovery that declining pages are younger (median 216 days) than growing ones (292). On one held-out fold the top 50 held 41 declining pages and 9 false alarms, all of which were actually trending up or stable — the model cannot yet tell a young page that is falling from one that is still climbing.</p>
+
+<h3>4.3 A true future-window label is much harder</h3>
+<figure><svg viewBox="0 0 680 132" role="img" class="chart">
+<line x1="250.0" y1="8" x2="250.0" y2="94" class="grid"/>
+<text x="250.0" y="110" class="tick" text-anchor="middle">0.00</text>
+<line x1="322.0" y1="8" x2="322.0" y2="94" class="grid"/>
+<text x="322.0" y="110" class="tick" text-anchor="middle">0.20</text>
+<line x1="394.0" y1="8" x2="394.0" y2="94" class="grid"/>
+<text x="394.0" y="110" class="tick" text-anchor="middle">0.40</text>
+<line x1="466.0" y1="8" x2="466.0" y2="94" class="grid"/>
+<text x="466.0" y="110" class="tick" text-anchor="middle">0.60</text>
+<line x1="538.0" y1="8" x2="538.0" y2="94" class="grid"/>
+<text x="538.0" y="110" class="tick" text-anchor="middle">0.80</text>
+<line x1="610.0" y1="8" x2="610.0" y2="94" class="grid"/>
+<text x="610.0" y="110" class="tick" text-anchor="middle">1.00</text>
+<line x1="430.0" y1="22" x2="430.0" y2="94" class="ref"/><text x="430.0" y="18" class="reflabel" text-anchor="middle">coin flip</text>
+<g class="mark"><title>Honest: 5 features from Mar 1–15: 0.60</title>
+<text x="240" y="43.4" class="lab" text-anchor="end">Honest: 5 features from Mar 1–15</text>
+<path d="M250,28 h212.7 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-212.7 z" fill="var(--series-1)"/>
+<text x="472.7" y="43.4" class="val">0.60</text></g>
+<g class="mark"><title>+ one label-window column (leak): 0.79</title>
+<text x="240" y="75.4" class="lab" text-anchor="end">+ one label-window column (leak)</text>
+<path d="M250,60 h279.7 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-279.7 z" fill="var(--warn)"/>
+<text x="539.7" y="75.4" class="val">0.79</text></g>
+<text x="430.0" y="128" class="axis" text-anchor="middle">ROC AUC on held-out clients (0.50 = coin flip)</text></svg><figcaption><b>Figure 4.</b> Warehouse, March 2026, held-out clients. With honest features only, the signal is weak but real (ROC AUC 0.60). Adding one column from the label window inflates it to 0.79 — information that would never exist at the decision moment.</figcaption></figure>
+<p>Predicting whether a page's impressions will fall over the <i>next</i> two weeks from only the previous two weeks of search signals is far harder than recognising a page whose current trend is already down. The leak experiment shows why a too-good number deserves suspicion before celebration.</p>
+
+<h2>5. Limitations and honest framing</h2>
+<ul>
+<li><b>Proxy label.</b> The main results use the current trend, not a future outcome: they show which pages <i>look like</i> declining pages now. With a true future label the honest signal is much weaker (ROC AUC 0.60).</li>
+<li><b>No causal claim.</b> Nothing here shows that refreshing a page causes recovery, or reveals how Google ranks pages. Results are observed, directional and meant for decision support.</li>
+<li><b>Models are not separable.</b> The stronger models differ by less than their fold-to-fold spread; the finding is "learned beats rules", not "this model beats that one".</li>
+<li><b>Low CTR is not proof of a bad title.</b> The queue is dominated by visible, rarely clicked pages; a search-page feature (answer box, AI overview) may be taking those clicks. The action is a review, not a rewrite order.</li>
+<li><b>Thin, unbalanced history.</b> Only 3 of 104 warehouse clients have 12+ months of search history and 37 have no search start date, so seasonality cannot be checked. One starter fold is a single large client.</li>
+<li><b>Pooled scores.</b> The final queue pools out-of-fold scores from five models; their probability scales are similar but not identical.</li>
+</ul>
+
+<h2>6. Ranked recommendations</h2>
+<p>The queue ranks the 22,006 pages with at least 100 impressions in 90 days by their out-of-fold Logistic Regression score. Of its top 50, <b>82%</b> were actually declining, and 83.5% of its top 200 — against 54% for a random pick. Every page carries transparent reason codes and one suggested action:</p>
+<div class="tw"><table class=""><thead><tr><th>Reason code</th><th>Rule (all transparent)</th><th>Suggested action</th></tr></thead><tbody><tr><td><code>low_ctr_visible</code></td><td>≥ 500 impressions, position 1–20, CTR &lt; 0.5%</td><td>Review title, meta &amp; SERP snippet (check search-page features first)</td></tr><tr><td><code>page_one_decay_risk</code></td><td>position ≤ 10 and age ≥ 180 days</td><td>Protect: refresh facts, examples, date</td></tr><tr><td><code>stale_visible</code></td><td>not updated 180+ days, ≥ 500 impressions</td><td>Refresh content</td></tr><tr><td><code>thin_visible</code></td><td>&lt; 1,200 words, ≥ 250 impressions</td><td>Expand content</td></tr><tr><td><code>deep_position</code></td><td>position &gt; 20</td><td>Review intent match &amp; internal links</td></tr><tr><td><i>none</i></td><td>—</td><td>Monitor</td></tr></tbody></table></div>
+<figure><svg viewBox="0 0 680 210" role="img" class="chart">
+<line x1="260.0" y1="8" x2="260.0" y2="172" class="grid"/>
+<text x="260.0" y="188" class="tick" text-anchor="middle">0</text>
+<line x1="347.5" y1="8" x2="347.5" y2="172" class="grid"/>
+<text x="347.5" y="188" class="tick" text-anchor="middle">50</text>
+<line x1="435.0" y1="8" x2="435.0" y2="172" class="grid"/>
+<text x="435.0" y="188" class="tick" text-anchor="middle">100</text>
+<line x1="522.5" y1="8" x2="522.5" y2="172" class="grid"/>
+<text x="522.5" y="188" class="tick" text-anchor="middle">150</text>
+<line x1="610.0" y1="8" x2="610.0" y2="172" class="grid"/>
+<text x="610.0" y="188" class="tick" text-anchor="middle">200</text>
+<g class="mark"><title>Review title, meta &amp; SERP snippet: 177</title>
+<text x="250" y="25.4" class="lab" text-anchor="end">Review title, meta &amp; SERP snippet</text>
+<path d="M260,10 h305.8 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-305.8 z" fill="var(--series-1)"/>
+<text x="575.8" y="25.4" class="val">177</text></g>
+<g class="mark"><title>Review intent match &amp; internal links: 14</title>
+<text x="250" y="57.4" class="lab" text-anchor="end">Review intent match &amp; internal links</text>
+<path d="M260,42 h20.5 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-20.5 z" fill="var(--series-1)"/>
+<text x="290.5" y="57.4" class="val">14</text></g>
+<g class="mark"><title>Monitor: 6</title>
+<text x="250" y="89.4" class="lab" text-anchor="end">Monitor</text>
+<path d="M260,74 h6.5 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-6.5 z" fill="var(--series-1)"/>
+<text x="276.5" y="89.4" class="val">6</text></g>
+<g class="mark"><title>Refresh content: 2</title>
+<text x="250" y="121.4" class="lab" text-anchor="end">Refresh content</text>
+<path d="M260,106 h-0.5 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h0.5 z" fill="var(--series-1)"/>
+<text x="269.5" y="121.4" class="val">2</text></g>
+<g class="mark"><title>Protect: refresh facts &amp; date: 1</title>
+<text x="250" y="153.4" class="lab" text-anchor="end">Protect: refresh facts &amp; date</text>
+<path d="M260,138 h-2.0 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h2.0 z" fill="var(--series-1)"/>
+<text x="268.0" y="153.4" class="val">1</text></g>
+<text x="435.0" y="206" class="axis" text-anchor="middle">Pages among the top 200 of the review queue</text></svg><figcaption><b>Figure 5.</b> Suggested actions for the top 200 pages. The queue is dominated by highly visible pages that get almost no clicks.</figcaption></figure>
+<p><b>Top 10 of the review queue</b> (identifiers omitted; CTR in percent). All ten carry <code>low_ctr_visible</code>, so their suggested action is a title, meta and snippet review — each is visible on page one yet gets almost no clicks.</p>
+<div class="tw"><table class="num"><thead><tr><th>Rank</th><th>Score</th><th>Impressions (90d)</th><th>Avg position</th><th>CTR %</th><th>Age (days)</th><th>Days since update</th></tr></thead><tbody><tr><td>1</td><td>0.965</td><td>208,678</td><td>9.7</td><td>0.00</td><td>362</td><td>104</td></tr><tr><td>2</td><td>0.948</td><td>6,635</td><td>5.2</td><td>0.00</td><td>144</td><td>104</td></tr><tr><td>3</td><td>0.929</td><td>4,955</td><td>3.9</td><td>0.00</td><td>103</td><td>20</td></tr><tr><td>4</td><td>0.929</td><td>13,676</td><td>4.3</td><td>0.00</td><td>106</td><td>8</td></tr><tr><td>5</td><td>0.925</td><td>19,360</td><td>6.9</td><td>0.01</td><td>236</td><td>104</td></tr><tr><td>6</td><td>0.924</td><td>3,881</td><td>8.5</td><td>0.00</td><td>144</td><td>104</td></tr><tr><td>7</td><td>0.923</td><td>5,742</td><td>8.3</td><td>0.00</td><td>144</td><td>104</td></tr><tr><td>8</td><td>0.922</td><td>7,732</td><td>8.3</td><td>0.00</td><td>148</td><td>104</td></tr><tr><td>9</td><td>0.918</td><td>16,156</td><td>9.0</td><td>0.00</td><td>348</td><td>104</td></tr><tr><td>10</td><td>0.918</td><td>15,101</td><td>5.7</td><td>0.00</td><td>421</td><td>7</td></tr></tbody></table></div>
+<p><b>How an editor would use it tomorrow.</b></p>
+<ol>
+<li>Work the queue from the top, about 50 pages per review cycle; pages marked <i>high</i> confidence (score ≥ 0.70 and ≥ 500 impressions) first.</li>
+<li>For <code>low_ctr_visible</code> pages, first look at the live search page: if an answer box or AI overview takes the clicks, note it and move on; otherwise rewrite the title and meta description to match the query intent.</li>
+<li>For pages slipping beyond position 20, check whether the content still matches what searchers want and add internal links from stronger pages.</li>
+<li>Re-score monthly and compare: the honest future-window result says to treat the queue as a prioritised shortlist for human judgement, not an automatic decision.</li>
+</ol>
+
+<h2>7. Reproducibility</h2>
+<ul>
+<li><b>Repository:</b> <a href="https://github.com/MuhammadSulaiman08/FLYRANK-ML-INTERNSHIP">github.com/MuhammadSulaiman08/FLYRANK-ML-INTERNSHIP</a></li>
+<li><b>Capstone notebook (every number above):</b> <a href="https://github.com/MuhammadSulaiman08/FLYRANK-ML-INTERNSHIP/blob/main/work/notebooks/capstone.ipynb">work/notebooks/capstone.ipynb</a> — open it in Colab and choose <i>Run all</i>.</li>
+<li><b>Building blocks:</b> <a href="https://github.com/MuhammadSulaiman08/FLYRANK-ML-INTERNSHIP/blob/main/work/notebooks/w01_research_question.ipynb">research question</a> · <a href="https://github.com/MuhammadSulaiman08/FLYRANK-ML-INTERNSHIP/blob/main/work/notebooks/w02_ml_task_framing.ipynb">task framing</a> · <a href="https://github.com/MuhammadSulaiman08/FLYRANK-ML-INTERNSHIP/blob/main/work/notebooks/w03_data_contract.ipynb">data contract</a> · <a href="https://github.com/MuhammadSulaiman08/FLYRANK-ML-INTERNSHIP/blob/main/work/notebooks/w05_model.ipynb">model comparison</a></li>
+<li><b>Environment:</b> Python with pandas, NumPy, scikit-learn 1.6.1 and DuckDB (Google Colab). Seed 42 everywhere. Tree-ensemble scores can shift by a few hundredths across library versions; the rules-versus-models gap is the stable claim.</li>
+<li><b>Data access:</b> the starter file ships with the repository; the warehouse needs free, gated Hugging Face access and a read token stored as a Colab secret (never in code).</li>
+</ul>
+
+<h2>8. Acknowledgments and data credit</h2>
+<p>Built on the FlyRank ML Internship dataset — <a href="https://flyrank.ai">flyrank.ai</a>. All data is pseudonymized; no client, domain, URL or query appears in this work. Thanks to the FlyRank ML internship mentors for the starter pipeline and the warehouse release.</p>
+
+<footer>Muhammad Sulaiman · FlyRank ML Internship capstone · November 2026 · Claims are observed and decision-support only — not causal, and not a description of Google's algorithm.</footer>
+</main></body></html>
